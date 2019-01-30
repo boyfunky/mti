@@ -4,29 +4,6 @@ module Mti
   included do
     attr_accessor :mti_models
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     def self.has_subclass(table, can_autosave)
       @mti_models ||= []
 
@@ -43,16 +20,19 @@ module Mti
       end
     end
 
-    def self.create(attributes = nil, options = {}, &block)
+    def self.create(attributes = nil, &block)
       byebug
+
       if attributes.is_a?(Array)
-        attributes.collect { |attr| create(attr, options, &block) }
+        attributes.collect { |attr| create(attr, &block) }
       else
         object = new(attributes, options)
-        @mti_models.map {|model|
-          mti_model_column = model.to_s.camelize.constantize.column_names
-          object.send("build_#{model.to_s}", attributes.reject {|key, val| val unless mti_model_column.include? key.to_s})
-        }
+        if @mti_models.present?
+          @mti_models.map {|model|
+            mti_model_column = model.to_s.camelize.constantize.column_names
+            object.send("build_#{model.to_s}", attributes.reject {|key, val| val unless mti_model_column.include? key.to_s})
+          }
+        end
         yield(object) if block_given?
         object.save
         object
