@@ -20,19 +20,16 @@ module Mti
       end
     end
 
-    def self.create(attributes = nil, &block)
+    def self.create(attributes = nil, options = {}, &block)
       byebug
-
       if attributes.is_a?(Array)
-        attributes.collect { |attr| create(attr, &block) }
+        attributes.collect { |attr| create(attr, options, &block) }
       else
         object = new(attributes, options)
-        if @mti_models.present?
-          @mti_models.map {|model|
-            mti_model_column = model.to_s.camelize.constantize.column_names
-            object.send("build_#{model.to_s}", attributes.reject {|key, val| val unless mti_model_column.include? key.to_s})
-          }
-        end
+        @mti_models.map {|model|
+          mti_model_column = model.to_s.camelize.constantize.column_names
+          object.send("build_#{model.to_s}", attributes.reject {|key, val| val unless mti_model_column.include? key.to_s})
+        }
         yield(object) if block_given?
         object.save
         object
