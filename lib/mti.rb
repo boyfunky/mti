@@ -13,7 +13,7 @@ module Mti
 
       @mti_models << table
 
-      has_one table, autosave: can_autosave, dependent: :destroy
+      has_one table, autosave: true, dependent: :destroy
 
       table_columns.each do |col|
         delegate col.to_sym, "#{col}=".to_sym, to: table, allow_nil: true
